@@ -25,20 +25,61 @@ HEADERS = {
     )
 }
 
-PRICE_RE = re.compile(r"[\d]+(?:[.,]\d{1,2})?")
+MONTHLY_MARKERS = [
+    "/mese",
+    "al mese",
+    "mensil",
+    "rate",
+    "rateiz",
+    "finanziament",
+    "tan",
+    "taeg"
+]
+
+EURO_PRICE_RE = re.compile(r"€\s?(\d{1,4}(?:[.,]\d{1,2})?)|(\d{1,4}(?:[.,]\d{1,2})?)\s?€")
+PURE_NUMBER_RE = re.compile(r"^\s*(\d+(?:[.,]\d{1,2})?)\s*$")
 
 
 def _clean_price(raw):
     if raw is None:
         return None
-    raw = str(raw).replace("\xa0", " ").strip()
-    match = PRICE_RE.search(raw.replace(",", "."))
-    if not match:
+    raw = str(raw).replace("\xa0", " ")
+    
+    # 1. Check if it's a pure number (from JSON-LD or meta tags)
+    pure_match = PURE_NUMBER_RE.match(raw)
+    if pure_match:
+        try:
+            return float(pure_match.group(1).replace(",", "."))
+        except ValueError:
+            return None
+
+    # 2. Extract from page text looking for euro symbols
+    valid_prices = []
+    
+    for match in EURO_PRICE_RE.finditer(raw):
+        num_str = match.group(1) or match.group(2)
+        try:
+            price_val = float(num_str.replace(",", "."))
+        except ValueError:
+            continue
+            
+        # Check the ~40 characters immediately following this match
+        end_idx = match.end()
+        following_text = raw[end_idx : end_idx + 40].lower()
+        
+        is_monthly = False
+        for marker in MONTHLY_MARKERS:
+            if marker in following_text:
+                is_monthly = True
+                break
+                
+        if not is_monthly:
+            valid_prices.append(price_val)
+            
+    if not valid_prices:
         return None
-    try:
-        return float(match.group())
-    except ValueError:
-        return None
+        
+    return min(valid_prices)
 
 
 def _from_jsonld(soup):
