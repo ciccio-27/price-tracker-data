@@ -4,5 +4,11 @@
     "name": "iphone 16E",
     "category": "smartphone",
     "target_price": 500
+  },
+  {
+    "id": "1788434031579",
+    "name": "iphone 17",
+    "category": "smartphone",
+    "target_price": 800
   }
 ]
