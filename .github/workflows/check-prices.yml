@@ -33,12 +33,16 @@ jobs:
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
           EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EVENT_NAME: ${{ github.event_name }}
         run: python scraper/track.py
+        
+      - name: Update schedule
+        run: python scraper/update_schedule.py
 
       - name: Commit updated data
         run: |
           git config user.name "deal-tracker-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/price_history.json data/offers.json data/actions.json
+          git add data/price_history.json data/offers.json data/actions.json .github/workflows/check-prices.yml
           git diff --quiet --cached || git commit -m "Update prices [skip ci]"
           git push

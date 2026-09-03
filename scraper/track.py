@@ -11,6 +11,7 @@ All three files are committed back to the repo by the workflow.
 """
 import json
 import sys
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -51,11 +52,16 @@ def main():
         return
 
     now = datetime.now(timezone.utc).isoformat()
+    is_push_event = os.environ.get("EVENT_NAME") == "push"
 
     for product in products:
         pid = product["id"]
         name = product.get("name", pid)
         target_price = product.get("target_price")
+
+        if is_push_event and pid in offers_data:
+            print(f"Skipping '{name}' (already tracked, push event only checks new products).")
+            continue
 
         print(f"Searching offers for '{name}' ...")
         try:
