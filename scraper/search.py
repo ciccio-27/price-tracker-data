@@ -41,7 +41,7 @@ def search_candidate_urls(query, max_results=20):
             "query": f"{query} prezzo acquista",
             "search_depth": "basic",
             "max_results": max_results,
-            "include_raw_content": true
+            "include_raw_content": True
         },
         timeout=20,
     )

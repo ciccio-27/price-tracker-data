@@ -45,4 +45,4 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/price_history.json data/offers.json data/actions.json .github/workflows/check-prices.yml
           git diff --quiet --cached || git commit -m "Update prices [skip ci]"
-          git push
+          git push origin HEAD:master
