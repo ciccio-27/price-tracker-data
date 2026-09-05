@@ -16,5 +16,11 @@
     "name": "iphone 17",
     "category": "smartphone",
     "target_price": 800
+  },
+  {
+    "id": "1788598633309",
+    "name": "Iphone 17E",
+    "category": "smartphone",
+    "target_price": null
   }
 ]
