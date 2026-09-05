@@ -5,9 +5,8 @@ on:
     paths:
       - "data/products.json"
   schedule:
-    # once a day. Each run does one search per tracked product, which
-    # costs Tavily search quota (1,000 free/month) — see README for the math
-    # before making this more frequent.
+    # Fixed hourly poll — track.py reads data/schedule.json to decide
+    # whether to actually run, so we never need to modify this file.
     - cron: "0 * * * *"
   workflow_dispatch: {}
 
@@ -35,7 +34,7 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EVENT_NAME: ${{ github.event_name }}
         run: python scraper/track.py
-        
+
       - name: Update schedule
         run: python scraper/update_schedule.py
 
@@ -43,7 +42,7 @@ jobs:
         run: |
           git config user.name "deal-tracker-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/price_history.json data/offers.json data/actions.json .github/workflows/check-prices.yml
+          git add data/price_history.json data/offers.json data/actions.json data/schedule.json
           git diff --quiet --cached || git commit -m "Update prices [skip ci]"
           git pull --rebase origin master
           git push origin HEAD:master

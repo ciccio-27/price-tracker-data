@@ -18,6 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from search import find_offers  # noqa: E402
 from notify import send_email  # noqa: E402
+from schedule_guard import should_run  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTS_FILE = ROOT / "data" / "products.json"
@@ -51,8 +52,16 @@ def main():
         print("No products to check yet.")
         return
 
+    event_name = os.environ.get("EVENT_NAME", "")
+    is_push_event = event_name == "push"
+
+    # On scheduled runs, respect the frequency stored in data/schedule.json.
+    # Push events and manual dispatches always proceed.
+    if event_name == "schedule" and not should_run():
+        print("Skipping: not a scheduled run slot (see data/schedule.json).")
+        return
+
     now = datetime.now(timezone.utc).isoformat()
-    is_push_event = os.environ.get("EVENT_NAME") == "push"
 
     for product in products:
         pid = product["id"]
