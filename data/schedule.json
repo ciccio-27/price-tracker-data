@@ -1,0 +1,4 @@
+{
+  "cron": "0 6 * * *",
+  "product_count": 4
+}
